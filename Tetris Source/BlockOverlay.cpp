@@ -3,7 +3,6 @@
 	Defines the methods and members of the BlockOverlay class.
 */
 
-#pragma once
 #include "BlockOverlay.h"
 
 //Default BlockOverlay class constructor

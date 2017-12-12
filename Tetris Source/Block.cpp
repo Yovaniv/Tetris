@@ -3,7 +3,6 @@
 	Defines the methods and members of the Block class.
 */
 
-#pragma once
 #include "constants.h"
 #include "Block.h"
 

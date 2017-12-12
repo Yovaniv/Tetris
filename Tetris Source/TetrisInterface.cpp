@@ -3,7 +3,6 @@
 	Defines the methods and members of the TetrisInterface class.
 */
 
-#pragma once
 #include "constants.h"
 #include "SFML\Graphics.hpp"
 #include "Tetrimino.h"
