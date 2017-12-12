@@ -7,7 +7,6 @@
 
 #pragma once
 #include "constants.h"
-#include "bgi\graphics.h"
 #include "Tetrimino.h"
 #include "Timer.h"
 #include "BlockOverlay.h"
@@ -16,6 +15,7 @@ class TetrisInterface{
 public:
 	TetrisInterface();
 	TetrisInterface(int time);
+	//~TetrisInterface();
 	void draw();
 	void clear();
 	bool stillPlaying();
@@ -27,9 +27,10 @@ public:
 	void resetDelayer();
 	bool isPaused();
 	void setPause(bool pause);
-	void draw(Tetrimino* typeSource);
+	void draw(Tetrimino* current, Tetrimino* typeSource);
 	void drawGameOver();
 	void drawPaused();
+	void display();
 	bool tetriminoCanRotate(Tetrimino* current);
 	bool tetriminoCanMoveLeft(Tetrimino* current);
 	bool tetriminoCanMoveRight(Tetrimino* current);
@@ -45,9 +46,14 @@ public:
 	void setScore(int newScore);
 	void setLinesCleared(int newClear);
 	void setLevel(int newLevel);
+	bool pollEvent();
+	sf::Keyboard::Key getEventKey();
+	void clearDisplay();
 private:
 	int score, linesCleared, level;
 	bool playing, gameOver, paused;
 	Timer timer, delayer, pauser;
 	BlockOverlay blockOverlay;
+	sf::RenderWindow mainWindow;
+	sf::Event currentEvent;
 };

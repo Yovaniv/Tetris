@@ -4,7 +4,6 @@
 */
 
 #include "constants.h"
-#include "bgi\graphics.h"
 #include "Tetrimino.h"
 
 //Default Tetrimino constructor
@@ -84,7 +83,7 @@ void Tetrimino::setXY(int newX, int newY){
 }
 
 //Sets the block color of the Tetrimino instance
-void Tetrimino::setBlockColor(int newBlockColor){
+void Tetrimino::setBlockColor(sf::Color newBlockColor){
 	blockColor = newBlockColor;
 }
 

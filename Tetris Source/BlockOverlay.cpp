@@ -214,3 +214,11 @@ bool BlockOverlay::withinBoundary(Tetrimino* tetrimino){
 	}
 	return true;
 }
+
+int BlockOverlay::getBlockCount(){
+	return blockCount;
+}
+
+Block BlockOverlay::getBlock(int index){
+	return blocks[index];
+}

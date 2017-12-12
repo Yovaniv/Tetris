@@ -30,6 +30,8 @@ public:
 	bool tetriminoCanMoveDown(Tetrimino* current);
 	bool checkForOverlap(Tetrimino* tetrimino);
 	bool withinBoundary(Tetrimino* tetrimino);
+	int getBlockCount();
+	Block getBlock(int index);
 private:
 	Block* blocks;
 	int blockCount;

@@ -1,6 +1,6 @@
 /*
 	main.cpp
-	Uses winbgim to display a Tetris game, where sets of blocks known as tetriminos 
+	Uses SFML to display a Tetris game, where sets of blocks known as tetriminos 
 	are continually stacked on top of each other. When a horizontal line of blocks is 
 	formed, it is cleared therby increasing the score, level, and difficulty. When a tetrimino cannot be added to 
 	the play area due to the existing blocks being too high, the current game is over.
@@ -8,11 +8,12 @@
 
 #include "TetrisInterface.h"
 #include "RandomTetrimino.h"
+#include "SFML\Graphics.hpp"
 
 //The main program loop, which primarily handles the current tetrimino and interface interactions
 int main(){
 	bool page = false, forcedTetriminoToMoveDown = false;
-	srand(GetTickCount());
+	std::srand(GetTickCount());
 	Tetrimino* currentTetrimino = nullptr;
 	Tetrimino* queuedTetrimino = randomTetrimino();
 	TetrisInterface tetrisInterface = TetrisInterface();
@@ -28,66 +29,58 @@ int main(){
 					tetrisInterface.setGameOver(true);
 				}
 			}
-			setactivepage(page);
-			setbkcolor(BACKGROUND_COLOR);
 
-			tetrisInterface.draw(queuedTetrimino);
-			currentTetrimino->draw();
-
+			tetrisInterface.draw(currentTetrimino, queuedTetrimino);
 			if (tetrisInterface.isGameOver()){
 				tetrisInterface.drawGameOver();
 			} else if (tetrisInterface.isPaused()){
 				tetrisInterface.drawPaused();
 			}
-			setvisualpage(page);
+			tetrisInterface.display();
 
-			if (kbhit() && !tetrisInterface.isGameOver()){
-				switch (getch()){
-				case KEY_UP:
-				case 'w':
-				case 'W':
+			if (tetrisInterface.pollEvent() && !tetrisInterface.isGameOver()){
+				switch (tetrisInterface.getEventKey()){
+				case sf::Keyboard::Up:
+				case sf::Keyboard::W:
 					if (tetrisInterface.tetriminoCanRotate(currentTetrimino)){
 						currentTetrimino->rotate();
 					}
 					break;
-				case KEY_LEFT:
-				case 'a':
-				case 'A':
+				case sf::Keyboard::Left:
+				case sf::Keyboard::A:
 					if (tetrisInterface.tetriminoCanMoveLeft(currentTetrimino)){
 						currentTetrimino->moveLeft();
 					}
 					break;
-				case KEY_RIGHT:
-				case 'd':
-				case 'D':
+				case sf::Keyboard::Right:
+				case sf::Keyboard::D:
 					if (tetrisInterface.tetriminoCanMoveRight(currentTetrimino)){
 						currentTetrimino->moveRight();
 					}
 					break;
-				case KEY_DOWN:
-				case 's':
-				case 'S':
+				case sf::Keyboard::Down:
+				case sf::Keyboard::S:
 					if (tetrisInterface.tetriminoCanMoveDown(currentTetrimino)){
 						currentTetrimino->moveDown();
 					} else {
 						forcedTetriminoToMoveDown = true;
 					}
 					break;
-				case KEY_SPACE:
-				case KEY_ENTER:
+				case sf::Keyboard::Space:
+				case sf::Keyboard::Return:
 					while (tetrisInterface.tetriminoCanMoveDown(currentTetrimino)){
 						currentTetrimino->moveDown();
 					}
 					forcedTetriminoToMoveDown = true;
 					break;
-				case 'p':
+				case sf::Keyboard::P:
 					if (tetrisInterface.isPaused()){
 						tetrisInterface.setPause(false);
 					} else {
 						tetrisInterface.setPause(true);
 					}
 					break;
-				case KEY_ESC:
+				case sf::Keyboard::Escape:
 					tetrisInterface.setPlaying(false);
 					break;
 				default:
@@ -111,34 +104,32 @@ int main(){
 				}
 				tetrisInterface.clearLines();
 			}
-			setvisualpage(page);
-			page = !page;
-			setactivepage(page);
-			delay(35);
-			cleardevice();
+			tetrisInterface.clearDisplay();
 		} else {
-			switch (getch()){
-			case KEY_SPACE:
-			case KEY_ENTER:
-				tetrisInterface.clear();
-				if (currentTetrimino != nullptr){
-					delete currentTetrimino;
-					currentTetrimino = nullptr;
+			if (tetrisInterface.pollEvent()){
+				switch (tetrisInterface.getEventKey()){
+				case sf::Keyboard::Space:
+				case sf::Keyboard::Return:
+					tetrisInterface.clear();
+					if (currentTetrimino != nullptr){
+						delete currentTetrimino;
+						currentTetrimino = nullptr;
+					}
+					if (queuedTetrimino != nullptr){
+						delete queuedTetrimino;
+						queuedTetrimino = nullptr;
+					}
+					queuedTetrimino = randomTetrimino();
+					tetrisInterface.setGameOver(false);
+					break;
+				case sf::Keyboard::Escape:
+					tetrisInterface.setPlaying(false);
+					break;
+				default:
+					break;
 				}
-				if (queuedTetrimino != nullptr){
-					delete queuedTetrimino;
-					queuedTetrimino = nullptr;
-				}
-				queuedTetrimino = randomTetrimino();
-				tetrisInterface.setGameOver(false);
-				break;
-			case KEY_ESC:
-				tetrisInterface.setPlaying(false);
-				break;
-			default:
-				break;
 			}
-			delay(35);
+			//delay(35);
 		}
 	}
 	if (currentTetrimino != nullptr){
