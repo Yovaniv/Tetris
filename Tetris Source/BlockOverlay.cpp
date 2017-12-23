@@ -3,7 +3,6 @@
 	Defines the methods and members of the BlockOverlay class.
 */
 
-#pragma once
 #include "BlockOverlay.h"
 
 //Default BlockOverlay class constructor
@@ -213,4 +212,12 @@ bool BlockOverlay::withinBoundary(Tetrimino* tetrimino){
 		}
 	}
 	return true;
+}
+
+int BlockOverlay::getBlockCount(){
+	return blockCount;
+}
+
+Block BlockOverlay::getBlock(int index){
+	return blocks[index];
 }

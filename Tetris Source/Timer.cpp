@@ -4,7 +4,7 @@
 */
 
 #include "timer.h"
-#include "bgi\graphics.h"
+#include <Windows.h>
 
 //Default Timer constructor that automatically sets the reference time as the time since system start up
 Timer::Timer(){

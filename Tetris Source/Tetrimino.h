@@ -25,7 +25,7 @@ public:
 	virtual void setX(int newX);
 	virtual void setY(int newY);
 	void setXY(int newX, int newY);
-	void setBlockColor(int newBlockColor);
+	void setBlockColor(sf::Color newBlockColor);
 	void setBlockCount(int newCount);
 	void setBlocks();
 	void setBlock(int index, Block newBlock);
@@ -34,7 +34,8 @@ public:
 
 protected:
 	Block* blocks;
-	int blockCount, blockColor;
+	int blockCount;
+	sf::Color blockColor;
 	int x, y;
 	TetriminoType type;
 	TetriminoOrientation orientation;

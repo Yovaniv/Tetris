@@ -4,12 +4,13 @@
 */
 
 #pragma once
+#include "SFML\Graphics.hpp"
 
 class Block{
 public:
 	Block();
 	Block(int xPosition, int yPosition);
-	Block(int xPosition, int yPosition, int color);
+	Block(int xPosition, int yPosition, sf::Color color);
 	void draw();
 	void moveLeft();
 	void moveRight();
@@ -19,16 +20,17 @@ public:
 	int getY();
 	int getXLength();
 	int getYLength();
-	int getColor();
+	sf::Color getColor();
 	void setX(int xNew);
 	void setY(int yNew);
 	void setXLength(int newLength);
 	void setYLength(int newLength);
-	void setColor(int newColor);
+	void setColor(sf::Color newColor);
+	sf::RectangleShape asRectangleShape();
 private:
 	int x;
 	int xLength;
 	int y;
 	int yLength;
-	int blockColor;
+	sf::Color blockColor;
 };

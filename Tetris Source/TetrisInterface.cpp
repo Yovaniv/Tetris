@@ -3,9 +3,8 @@
 	Defines the methods and members of the TetrisInterface class.
 */
 
-#pragma once
 #include "constants.h"
-#include "bgi\graphics.h"
+#include "SFML\Graphics.hpp"
 #include "Tetrimino.h"
 #include "TetrisInterface.h"
 
@@ -17,7 +16,9 @@ TetrisInterface::TetrisInterface(){
 	playing = true;
 	gameOver = false;
 	paused = false;
-	initwindow(WIDTH, HEIGHT, "Tetris");
+	mainWindow.create(sf::VideoMode(WIDTH, HEIGHT), "Tetris");
+	mainWindow.clear(BACKGROUND_COLOR);
+	mainWindow.setVerticalSyncEnabled(true);
 	blockOverlay = BlockOverlay();
 	timer = Timer();
 	delayer = Timer();
@@ -36,33 +37,53 @@ TetrisInterface::TetrisInterface(int time){
 	gameOver = false;
 	paused = false;
 	blockOverlay = BlockOverlay();
-	initwindow(WIDTH, HEIGHT, "Tetris");
+	mainWindow.create(sf::VideoMode(WIDTH, HEIGHT), "Tetris");
+	mainWindow.clear(BACKGROUND_COLOR);
 }
+
+
+/*TetrisInterface::~TetrisInterface(){
+	delete mainWindow;
+}*/
 
 //Draws the side display panel using winbgim 
 void TetrisInterface::draw(){
-	setcolor(INTERFACE_COLOR);
-	setfillstyle(SOLID_FILL, INTERFACE_COLOR);
-	int vertices[4 * 2] = { BLOCK_GRID_WIDTH, 0, BLOCK_GRID_WIDTH + INTERFACE_WIDTH, 0, BLOCK_GRID_WIDTH + INTERFACE_WIDTH, INTERFACE_HEIGHT, BLOCK_GRID_WIDTH, INTERFACE_HEIGHT };
-	fillpoly(4, vertices);
-	setcolor(WHITE);
-	setfillstyle(SOLID_FILL, WHITE);
-	rectangle(BLOCK_GRID_WIDTH, 0, BLOCK_GRID_WIDTH + INTERFACE_WIDTH, INTERFACE_HEIGHT);
-	//line(BLOCK_GRID_WIDTH + (WIDTH - BLOCK_GRID_WIDTH) / 2, 0, BLOCK_GRID_WIDTH + (WIDTH - BLOCK_GRID_WIDTH) / 2, INTERFACE_HEIGHT);
-	setbkcolor(INTERFACE_COLOR);
-	settextstyle(BOLD_FONT, HORIZ_DIR, FONT_SIZE);
+	sf::RectangleShape panel;
+	panel.setSize(sf::Vector2f(INTERFACE_WIDTH, INTERFACE_HEIGHT) - sf::Vector2f(INTERFACE_OUTLINE_THICKNESS, INTERFACE_OUTLINE_THICKNESS));
+	panel.setFillColor(INTERFACE_COLOR);
+	panel.setOutlineColor(INTERFACE_OUTLINE_COLOR);
+	panel.setOutlineThickness(INTERFACE_OUTLINE_THICKNESS);
+	panel.setPosition(sf::Vector2f(WIDTH - INTERFACE_WIDTH + INTERFACE_OUTLINE_THICKNESS, 0));
+	mainWindow.draw(panel);
 
+	sf::Font font;
+	font.loadFromFile("resources/arial.ttf");
+
+	sf::Text text;
+	text.setFont(font);
+	text.setCharacterSize(FONT_SIZE);
+	text.setFillColor(FONT_COLOR);
 	char stringBuffer[30] = { '\0' };
 	sprintf_s(stringBuffer, "Next Tetrimino");
-	settextjustify(CENTER_TEXT, TOP_TEXT);
-	outtextxy(BLOCK_GRID_WIDTH + (WIDTH - BLOCK_GRID_WIDTH) / 2, FONT_SIZE, stringBuffer);
-	settextjustify(LEFT_TEXT, VCENTER_TEXT);
+	text.setString(stringBuffer);
+	text.setPosition(BLOCK_GRID_WIDTH + (INTERFACE_WIDTH - text.getLocalBounds().width) / 2, 0);
+	mainWindow.draw(text);
+
 	sprintf_s(stringBuffer, "Level: %i", level);
-	outtextxy(BLOCK_GRID_WIDTH + 5, HEIGHT / 2, stringBuffer);
+	text.setPosition(BLOCK_GRID_WIDTH + 5, HEIGHT / 2);
+	text.setString(stringBuffer);
+	mainWindow.draw(text);
+
 	sprintf_s(stringBuffer, "Lines: %i", linesCleared);
-	outtextxy(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + FONT_SIZE, stringBuffer);
+	text.setPosition(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + FONT_SIZE);
+	text.setString(stringBuffer);
+	mainWindow.draw(text);
+
 	sprintf_s(stringBuffer, "Score: %i", score);
-	outtextxy(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 2 * FONT_SIZE, stringBuffer);
+	text.setPosition(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 2 * FONT_SIZE);
+	text.setString(stringBuffer);
+	mainWindow.draw(text);
+
 	int currentTime = timer.getCurrentTime() / 1000;
 	if (isPaused()){
 		currentTime = (pauser.getReferenceTime() - timer.getReferenceTime()) / 1000;
@@ -73,18 +94,32 @@ void TetrisInterface::draw(){
 		sprintf_s(stringBuffer, "Time: %im %is", currentTime / 60, currentTime % 60);
 	else
 		sprintf_s(stringBuffer, "Time: %ih %im %is", currentTime / 3600, (currentTime % 3600) / 60, (currentTime % 3600) % 60);
-	outtextxy(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 3 * FONT_SIZE, stringBuffer);
+	text.setPosition(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 3 * FONT_SIZE);
+	text.setString(stringBuffer);
+	mainWindow.draw(text);
+
+
 	sprintf_s(stringBuffer, "Drop Speed: %ims", getTimeDelay());
-	outtextxy(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 4 * FONT_SIZE, stringBuffer);
+	text.setPosition(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 4 * FONT_SIZE);
+	text.setString(stringBuffer);
+	mainWindow.draw(text);
+
 	currentTime = getTimeDelay() - delayer.getCurrentTime();
 	if (isPaused()){
 		currentTime = pauser.getReferenceTime() - delayer.getReferenceTime();
 	}
 	sprintf_s(stringBuffer, "Drops in: %ims", currentTime);
-	outtextxy(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 5 * FONT_SIZE, stringBuffer);
-	setbkcolor(BACKGROUND_COLOR);
+	text.setPosition(BLOCK_GRID_WIDTH + 5, HEIGHT / 2 + 5 * FONT_SIZE);
+	text.setString(stringBuffer);
+	mainWindow.draw(text);
+	
+	for (int i = 0; i < blockOverlay.getBlockCount(); i++){
+		mainWindow.draw(blockOverlay.getBlock(i).asRectangleShape());
+	}
+}
 
-	blockOverlay.draw();
+void TetrisInterface::display(){
+	mainWindow.display();
 }
 
 //Resets the calling instance's members
@@ -100,7 +135,7 @@ void TetrisInterface::clear(){
 
 //Returns whether the TetrisInterface instance is still playing
 bool TetrisInterface::stillPlaying(){
-	return playing;
+	return playing && mainWindow.isOpen();
 }
 
 //Sets whether the TetrisInterface instance is still playing
@@ -160,7 +195,7 @@ void TetrisInterface::setPause(bool pause){
 }
 
 //Draws a tetrimino in the side display panel
-void TetrisInterface::draw(Tetrimino* typeSource){
+void TetrisInterface::draw(Tetrimino* current, Tetrimino* typeSource){
 	draw();
 	Tetrimino* tempTetrimino = typeSource->clone();
 	tempTetrimino->setY(BLOCK_LENGTH);
@@ -189,30 +224,61 @@ void TetrisInterface::draw(Tetrimino* typeSource){
 	default:
 		break;
 	}
-	tempTetrimino->draw();
+	for (int i = 0; i < tempTetrimino->getBlockCount(); i++){
+		sf::RectangleShape block = tempTetrimino->getBlock(i).asRectangleShape();
+		mainWindow.draw(block);
+	}
 	delete tempTetrimino;
+	for (int i = 0; i < current->getBlockCount(); i++){
+		sf::RectangleShape block = current->getBlock(i).asRectangleShape();
+		mainWindow.draw(block);
+	}
 }
 
 //Draws "Game Over" at the center of the play area, using winbgim
 void TetrisInterface::drawGameOver(){
-	char str[10] = "Game Over";
-	settextstyle(BOLD_FONT, HORIZ_DIR, FONT_SIZE / 5);
-	setbkcolor(BLACK);
-	settextjustify(CENTER_TEXT, VCENTER_TEXT);
-	outtextxy(WIDTH / 2, HEIGHT / 2, str);
-	settextjustify(LEFT_TEXT, VCENTER_TEXT);
-	setbkcolor(BACKGROUND_COLOR);
+	sf::Font font;
+	font.loadFromFile("resources/arial.ttf");
+
+	sf::Text text;
+	text.setFont(font);
+	text.setCharacterSize(2*FONT_SIZE);
+	text.setFillColor(FONT_COLOR);
+	text.setString("Game Over");
+	text.setPosition((BLOCK_GRID_WIDTH - text.getLocalBounds().width) / 2, HEIGHT / 2);
+
+	sf::RectangleShape back;
+	back.setSize(sf::Vector2f(text.getLocalBounds().width, text.getLocalBounds().height) + sf::Vector2f(4*FONT_SIZE, 4*FONT_SIZE));
+	back.setFillColor(INTERFACE_OUTLINE_COLOR);
+	back.setOrigin(sf::Vector2f(0, 0));
+	back.setOutlineColor(FONT_COLOR);
+	back.setOutlineThickness(FONT_SIZE);
+	back.setPosition(text.getPosition() - sf::Vector2f(2*FONT_SIZE, 1*FONT_SIZE));
+	mainWindow.draw(back);
+	mainWindow.draw(text);
 }
 
 //Draws "Paused" at the center of the play area, using winbgim
 void TetrisInterface::drawPaused(){
-	char str[7] = "Paused";
-	settextstyle(BOLD_FONT, HORIZ_DIR, FONT_SIZE / 5);
-	setbkcolor(BLACK);
-	settextjustify(CENTER_TEXT, VCENTER_TEXT);
-	outtextxy(WIDTH / 2, HEIGHT / 2, str);
-	settextjustify(LEFT_TEXT, VCENTER_TEXT);
-	setbkcolor(BACKGROUND_COLOR);
+	sf::Font font;
+	font.loadFromFile("resources/arial.ttf");
+
+	sf::Text text;
+	text.setFont(font);
+	text.setCharacterSize(2 * FONT_SIZE);
+	text.setFillColor(FONT_COLOR);
+	text.setString("Paused");
+	text.setPosition((WIDTH - text.getLocalBounds().width) / 2, HEIGHT / 2);
+
+	sf::RectangleShape back;
+	back.setSize(sf::Vector2f(text.getLocalBounds().width, text.getLocalBounds().height) + sf::Vector2f(4 * FONT_SIZE, 4 * FONT_SIZE));
+	back.setFillColor(INTERFACE_OUTLINE_COLOR);
+	back.setOrigin(sf::Vector2f(0, 0));
+	back.setOutlineColor(FONT_COLOR);
+	back.setOutlineThickness(FONT_SIZE);
+	back.setPosition(text.getPosition() - sf::Vector2f(2 * FONT_SIZE, 1 * FONT_SIZE));
+	mainWindow.draw(back);
+	mainWindow.draw(text);
 }
 
 //Returns true only when not paused and the tetrimino can rotate, according to the BlockOverlay instance
@@ -293,4 +359,24 @@ void TetrisInterface::setLinesCleared(int newClear){
 //Sets the level to an integer value
 void TetrisInterface::setLevel(int newLevel){
 	level = newLevel;
+}
+
+
+bool TetrisInterface::pollEvent(){
+	bool returnValue = mainWindow.pollEvent(currentEvent);
+		if ((currentEvent.type == sf::Event::Closed) || 
+			((currentEvent.type == sf::Event::KeyPressed) && (currentEvent.key.code == sf::Keyboard::Escape))){
+			mainWindow.close();
+			playing = false;
+		}
+		return returnValue && currentEvent.type == sf::Event::KeyPressed;
+
+}
+
+sf::Keyboard::Key TetrisInterface::getEventKey(){
+	return currentEvent.key.code;
+}
+
+void TetrisInterface::clearDisplay(){
+	mainWindow.clear(BACKGROUND_COLOR);
 }

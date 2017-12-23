@@ -3,9 +3,7 @@
 	Defines the methods and members of the Block class.
 */
 
-#pragma once
 #include "constants.h"
-#include "bgi\graphics.h"
 #include "Block.h"
 
 //Default Block constructor
@@ -27,7 +25,7 @@ Block::Block(int xPosition, int yPosition){
 }
 
 //Block constructor based on initial position and color
-Block::Block(int xPosition, int yPosition, int color){
+Block::Block(int xPosition, int yPosition, sf::Color color){
 	x = xPosition;
 	y = yPosition;
 	xLength = BLOCK_LENGTH;
@@ -37,13 +35,13 @@ Block::Block(int xPosition, int yPosition, int color){
 
 //Draws the Block instance as a square polygon, using winbgim
 void Block::draw(){
-	setcolor(blockColor);
+	/*setcolor(blockColor);
 	setfillstyle(SOLID_FILL, blockColor);
 	int vertices[4 * 2] = { x, y, x + xLength, y, x + xLength, y + yLength, x, y + yLength };
 	fillpoly(4, vertices);
 	setcolor(WHITE);
 	setfillstyle(SOLID_FILL, WHITE);
-	rectangle(x, y, x + xLength, y + yLength);
+	rectangle(x, y, x + xLength, y + yLength);*/
 }
 
 //Moves the Block instance left by decrementing its x position by the block length
@@ -89,7 +87,7 @@ int Block::getYLength(){
 }
 
 //Returns the color of the Block instance
-int Block::getColor(){
+sf::Color Block::getColor(){
 	return blockColor;
 }
 
@@ -114,6 +112,18 @@ void Block::setYLength(int newLength){
 }
 
 //Sets the color of the Block instance
-void Block::setColor(int newColor){
+void Block::setColor(sf::Color newColor){
 	blockColor = newColor;
+}
+
+
+sf::RectangleShape Block::asRectangleShape(){
+	sf::RectangleShape rectangle;
+	rectangle.setSize(sf::Vector2f(xLength, yLength) - sf::Vector2f(BLOCK_OUTLINE_THICKNESS, BLOCK_OUTLINE_THICKNESS));
+	rectangle.setOutlineThickness(BLOCK_OUTLINE_THICKNESS);
+	rectangle.setOutlineColor(DEFAULT_BLOCK_OUTLINE_COLOR);
+	rectangle.setFillColor(getColor());
+	rectangle.setOrigin(sf::Vector2f(0, 0));
+	rectangle.setPosition(sf::Vector2f(x, y));
+	return rectangle;
 }
